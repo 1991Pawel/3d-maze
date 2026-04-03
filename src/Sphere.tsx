@@ -1,11 +1,12 @@
 import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Mesh } from "three";
-
+import { RigidBody, vec3 } from "@react-three/rapier";
+import { useThree } from "@react-three/fiber";
 export default function Sphere(props) {
-  const meshRef = useRef<Mesh>(null);
+  const rigidBodyRef = useRef(null);
   const pressedKey = useRef<null | string>(null);
-  const ballSpeed = 5;
+  const ballSpeed = 0.1;
+  const { camera } = useThree();
 
   const handlePressKey = (event: KeyboardEvent) => {
     if (event.key) {
@@ -13,49 +14,38 @@ export default function Sphere(props) {
     }
   };
 
-  const handleReleaseKey = (event: KeyboardEvent) => {
-    if (event.key) {
-      pressedKey.current = null;
-    }
-  };
-
   useEffect(() => {
     window.addEventListener("keydown", handlePressKey);
-    window.addEventListener("keyup", handleReleaseKey);
     return () => {
       window.removeEventListener("keydown", handlePressKey);
-      window.removeEventListener("keyup", handleReleaseKey);
     };
   }, []);
 
-  useFrame((_, delta) => {
-    console.log("Sphere frame", pressedKey.current);
-    console.log("Delta time:", delta);
-    if (pressedKey.current === "ArrowUp") {
-      meshRef.current.position.z -= ballSpeed * delta;
-    }
-    if (pressedKey.current === "ArrowDown") {
-      meshRef.current.position.z += ballSpeed * delta;
-    }
-    if (pressedKey.current === "ArrowLeft") {
-      meshRef.current.position.x -= ballSpeed * delta;
-    }
-    if (pressedKey.current === "ArrowRight") {
-      meshRef.current.position.x += ballSpeed * delta;
-    }
-    if (pressedKey.current === null) {
-      meshRef.current.position.y = 0;
-      // alert("No key is pressed");
-    }
-    // if (pressedKey.current === " ") {
-    //   meshRef.current.position.y += ballSpeed * delta;
-    // }
+  useFrame(() => {
+    if (!rigidBodyRef.current) return;
+
+    const ballPosition = vec3(rigidBodyRef.current.translation());
+    camera.position.set(
+      ballPosition.x,
+      ballPosition.y + 100,
+      ballPosition.z + 25,
+    );
   });
 
   return (
-    <mesh {...props} ref={meshRef}>
-      <sphereGeometry args={[1.5, 64, 64]} />
-      <meshStandardMaterial color="#4f8ef7" metalness={0.3} roughness={0.2} />
-    </mesh>
+    <RigidBody
+      type="dynamic"
+      linearDamping={0.5}
+      angularDamping={0.5}
+      ref={rigidBodyRef}
+      restitution={1}
+      friction={0.5}
+      canSleep={false}
+    >
+      <mesh {...props}>
+        <sphereGeometry args={[1.5, 64, 64]} />
+        <meshStandardMaterial color="#4f8ef7" metalness={0.3} roughness={0.2} />
+      </mesh>
+    </RigidBody>
   );
 }
