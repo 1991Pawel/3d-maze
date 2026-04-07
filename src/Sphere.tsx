@@ -1,9 +1,16 @@
 import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { RigidBody, vec3 } from "@react-three/rapier";
+import { RigidBody, RapierRigidBody, vec3 } from "@react-three/rapier";
 import { useThree } from "@react-three/fiber";
-export default function Sphere(props) {
-  const rigidBodyRef = useRef(null);
+
+type SphereProps = {
+  rigidBodyRef?: React.RefObject<RapierRigidBody | null>;
+  [key: string]: unknown;
+};
+
+export default function Sphere({ rigidBodyRef: externalRef, ...props }: SphereProps) {
+  const internalRef = useRef<RapierRigidBody | null>(null);
+  const rigidBodyRef = externalRef ?? internalRef;
   const pressedKey = useRef<null | string>(null);
   const ballSpeed = 0.1;
   const { camera } = useThree();
