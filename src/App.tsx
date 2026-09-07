@@ -10,7 +10,7 @@ export default function App() {
         { name: "backward", keys: ["ArrowDown", "KeyS"] },
         { name: "leftward", keys: ["ArrowLeft", "KeyA"] },
         { name: "rightward", keys: ["ArrowRight", "KeyD"] },
-        { name: "space", keys: ["Space"] },
+        { name: "jump", keys: ["Space"] },
       ]}
     >
       <Canvas
